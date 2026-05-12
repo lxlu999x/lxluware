@@ -1,0 +1,647 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- // KIT DATA //
+local KitData = {
+	["black_market_trader"] = {Name="Wren",           Image="rbxassetid://18922642482"},
+	["baker"]               = {Name="Baker",           Image="rbxassetid://9155463919"},
+	["ice_queen"]           = {Name="Freiya",          Image="rbxassetid://9155466204"},
+	["yeti"]                = {Name="Yeti",            Image="rbxassetid://9166205917"},
+	["slime_tamer"]         = {Name="Noelle",          Image="rbxassetid://15379766168"},
+	["paladin"]             = {Name="Lani",            Image="rbxassetid://11202785737"},
+	["spirit_summoner"]     = {Name="Uma",             Image="rbxassetid://95760990786863"},
+	["bigman"]              = {Name="Eldertree",       Image="rbxassetid://9155467211"},
+	["aery"]                = {Name="Aery",            Image="rbxassetid://9155463221"},
+	["harpoon"]             = {Name="Triton",          Image="rbxassetid://18250634847"},
+	["star_collector"]      = {Name="Star",            Image="rbxassetid://9872356516"},
+	["rebellion_leader"]    = {Name="Silas",           Image="rbxassetid://18926409564"},
+	["winter_lady"]         = {Name="Sophia",          Image="rbxassetid://83274578564074"},
+	["axolotl"]             = {Name="Axo",             Image="rbxassetid://9155466713"},
+	["barbarian"]           = {Name="Barb",            Image="rbxassetid://9166207628"},
+	["hannah"]              = {Name="Hannah",          Image="rbxassetid://10726577232"},
+	["metal_detector"]      = {Name="Metal",           Image="rbxassetid://9378298061"},
+	["midnight"]            = {Name="Nyx",             Image="rbxassetid://9155462763"},
+	["soul_broker"]         = {Name="Zola",            Image="rbxassetid://130409166262430"},
+	["archer"]              = {Name="Archer",          Image="rbxassetid://9224796984"},
+	["mimic"]               = {Name="Milo",            Image="rbxassetid://14783283296"},
+	["frost_hammer_kit"]    = {Name="Adetunde",        Image="rbxassetid://11838567073"},
+	["angel"]               = {Name="Trinity",         Image="rbxassetid://9166208240"},
+	["styx"]                = {Name="Styx",            Image="rbxassetid://17014536631"},
+	["summoner"]            = {Name="Kaida",           Image="rbxassetid://18922378956"},
+	["falconer"]            = {Name="Bezkat",          Image="rbxassetid://17022941869"},
+	["smoke"]               = {Name="Smoke",           Image="rbxassetid://9155462247"},
+	["blood_assassin"]      = {Name="Cait",            Image="rbxassetid://12520290159"},
+	["alchemist"]           = {Name="Alchemist",       Image="rbxassetid://9155462512"},
+	["lumen"]               = {Name="Lumen",           Image="rbxassetid://9630018371"},
+	["cat"]                 = {Name="Yamini",          Image="rbxassetid://15350740470"},
+	["elk_master"]          = {Name="Sigrid",          Image="rbxassetid://15714972287"},
+	["triple_shot"]         = {Name="Vanessa",         Image="rbxassetid://9166208149"},
+	["dragon_sword"]        = {Name="Lian",            Image="rbxassetid://16213792383"},
+	["seahorse"]            = {Name="Sheila",          Image="rbxassetid://11902552560"},
+	["cactus"]              = {Name="Martin",          Image="rbxassetid://104436517801089"},
+	["farmer_cletus"]       = {Name="Farmer",          Image="rbxassetid://9155466936"},
+	["melody"]              = {Name="Melody",          Image="rbxassetid://9155464915"},
+	["pyro"]                = {Name="Pyro",            Image="rbxassetid://9155464770"},
+	["ninja"]               = {Name="Umenko",          Image="rbxassetid://15517037848"},
+	["berserker"]           = {Name="Ragnar",          Image="rbxassetid://84569046641940"},
+	["jailor"]              = {Name="Warden",          Image="rbxassetid://11664116980"},
+	["beekeeper"]           = {Name="Beekeeper",       Image="rbxassetid://9312831285"},
+	["necromancer"]         = {Name="Crypt",           Image="rbxassetid://11343458097"},
+	["sheep_herder"]        = {Name="Sheep",           Image="rbxassetid://9155465730"},
+	["gingerbread_man"]     = {Name="Gingerbread Man", Image="rbxassetid://9155464364"},
+	["regent"]              = {Name="Void Regent",     Image="rbxassetid://9166208904"},
+	["flower_bee"]          = {Name="Lyla",            Image="rbxassetid://101569742252812"},
+	["pinata"]              = {Name="Lucia",           Image="rbxassetid://10011261147"},
+	["tinker"]              = {Name="Heph",            Image="rbxassetid://17025762404"},
+	["taliyah"]             = {Name="Taliyah",         Image="rbxassetid://13989437601"},
+	["nyoka"]               = {Name="Nyoka",           Image="rbxassetid://17022941410"},
+	["owl"]                 = {Name="Whisper",         Image="rbxassetid://12509401147"},
+	["airbender"]           = {Name="Ramil",           Image="rbxassetid://74712750354593"},
+	["spearman"]            = {Name="Ares",            Image="rbxassetid://9166207341"},
+	["elektra"]             = {Name="Elektra",         Image="rbxassetid://13841413050"},
+	["disruptor"]           = {Name="Zenith",          Image="rbxassetid://11596993583"},
+	["davey"]               = {Name="Davey",           Image="rbxassetid://13905369482"},
+	["merchant"]            = {Name="Marco",           Image="rbxassetid://9872356790"},
+	["shielder"]            = {Name="Sheilder",        Image="rbxassetid://9155464114"},
+	["drill"]               = {Name="Drill",           Image="rbxassetid://12955100280"},
+	["spirit_gardener"]     = {Name="Grove",           Image="rbxassetid://132108376114488"},
+	["hatter"]              = {Name="Umbra",           Image="rbxassetid://12509388633"},
+	["cowgirl"]             = {Name="Lassy",           Image="rbxassetid://9155462968"},
+	["miner"]               = {Name="Miner",           Image="rbxassetid://11895535823"},
+	["wizard"]              = {Name="Zeno",            Image="rbxassetid://13353923546"},
+	["fisherman"]           = {Name="Fisher",          Image="rbxassetid://9166208359"},
+	["sword_shield"]        = {Name="Isabel",          Image="rbxassetid://131690429591874"},
+	["jade"]                = {Name="Jade",            Image="rbxassetid://9166306816"},
+	["skeleton"]            = {Name="Marrow",          Image="rbxassetid://120123419412119"},
+	["void_knight"]         = {Name="VoidKnight",      Image="rbxassetid://73636326782144"},
+	["bounty_hunter"]       = {Name="Bounty Hunter",   Image="rbxassetid://9166208649"},
+	["defender"]            = {Name="Marcel",          Image="rbxassetid://116567110607862"},
+	["dino_tamer"]          = {Name="Dino",            Image="rbxassetid://9872357009"},
+	["sorcerer"]            = {Name="Death",           Image="rbxassetid://97940108361528"},
+	["warrior"]             = {Name="Warrior",         Image="rbxassetid://9166207008"},
+	["raven"]               = {Name="Raven",           Image="rbxassetid://9166206554"},
+	["dasher"]              = {Name="Yuzi",            Image="rbxassetid://9155467645"},
+	["agni"]                = {Name="Agni",            Image="rbxassetid://17024640133"},
+	["builder"]             = {Name="Builder",         Image="rbxassetid://9155463708"},
+	["mage"]                = {Name="Whim",            Image="rbxassetid://10982191792"},
+	["ghost_catcher"]       = {Name="Gompy",           Image="rbxassetid://9224802656"},
+	["jellyfish"]           = {Name="Marina",          Image="rbxassetid://18129974852"},
+	["grim_reaper"]         = {Name="Grim",            Image="rbxassetid://9155467410"},
+	["warlock"]             = {Name="Eldric",          Image="rbxassetid://15186338366"},
+	["void_walker"]         = {Name="Trixie",          Image="rbxassetid://78915127961078"},
+	["spirit_assassin"]     = {Name="Evelynn",         Image="rbxassetid://10406002412"},
+	["vulcan"]              = {Name="Vulcan",          Image="rbxassetid://9155465543"},
+	["oasis"]               = {Name="Nahla",           Image="rbxassetid://120283205213823"},
+	["cyber"]               = {Name="Cyber",           Image="rbxassetid://9507126891"},
+	["none"]                = {Name="None",            Image="rbxassetid://16493320215"},
+}
+
+-- // STATE FLAGS //
+local PlayerESPEnabled  = false
+local MetalESPEnabled   = false
+local StarESPEnabled    = false
+local BeeESPEnabled     = false
+local KitRenderEnabled  = false
+local JoinNotifyEnabled = false
+
+-- // SHARED SPECIAL ESP ASSETS //
+local STAR_ICONS = {
+	CritStar     = "rbxassetid://9871798596",
+	VitalityStar = "rbxassetid://9871799391"
+}
+local BEE_IMAGE = "rbxassetid://7343272839"
+
+local starESPObjects = {}
+local beeESPObjects = {}
+
+-- // UTILS //
+local function getKitInfo(player)
+	local key = player:GetAttribute("PlayingAsKits")
+	local data = key and KitData[key]
+	return data and data.Name or "?", data and data.Image or ""
+end
+
+local function isTeammate(player)
+	return player.Team ~= nil and LocalPlayer.Team ~= nil and player.Team == LocalPlayer.Team
+end
+
+local function getRoot(obj)
+	if obj:IsA("Model") then return obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart") end
+	return obj:IsA("BasePart") and obj or nil
+end
+
+-- // AIMLOCK SETTINGS //
+local AimKey     = Enum.KeyCode.K
+local Max_Range  = 50
+local Smoothness = 0.35
+
+-- // AIMLOCK STATE //
+local AimlockEnabled = false
+local IsAiming       = false
+local CurrentTarget  = nil
+
+-- // AIMLOCK UTILS //
+local function isAlive(character)
+	if not character or not character.Parent then return false end
+	local hum = character:FindFirstChild("Humanoid")
+	return hum and hum.Health > 0
+end
+
+-- Always returns the single closest enemy to the local player right now
+local function getClosestTarget()
+	local char = LocalPlayer.Character
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
+	local myRoot = char.HumanoidRootPart
+	local best, bestDist = nil, Max_Range
+
+	for _, p in pairs(Players:GetPlayers()) do
+		if p ~= LocalPlayer and p.Team ~= LocalPlayer.Team and p.Character and isAlive(p.Character) then
+			local root = p.Character:FindFirstChild("HumanoidRootPart")
+			if root then
+				local worldDist = (root.Position - myRoot.Position).Magnitude
+				if worldDist <= bestDist then
+					bestDist = worldDist
+					best = p.Character
+				end
+			end
+		end
+	end
+	return best
+end
+
+UserInputService.InputBegan:Connect(function(i, g)
+	if g or not AimlockEnabled then return end
+	if i.KeyCode == AimKey then
+		IsAiming = not IsAiming
+		if IsAiming then
+			CurrentTarget = getClosestTarget()
+			if not CurrentTarget then IsAiming = false end
+		else
+			CurrentTarget = nil
+			if mouse1release then mouse1release() end
+		end
+	end
+end)
+
+RunService:BindToRenderStep("AimLock", 201, function()
+	if not AimlockEnabled or not IsAiming then return end
+
+	-- Always re-evaluate closest target every frame so we track whoever is nearest
+	local newTarget = getClosestTarget()
+	if newTarget ~= CurrentTarget then
+		CurrentTarget = newTarget
+	end
+
+	if not CurrentTarget then
+		IsAiming = false
+		if mouse1release then mouse1release() end
+		return
+	end
+
+	local torso = CurrentTarget:FindFirstChild("Torso") or CurrentTarget:FindFirstChild("UpperTorso") or CurrentTarget:FindFirstChild("HumanoidRootPart")
+	if not torso then return end
+
+	Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, torso.Position), Smoothness)
+
+	local highlight = CurrentTarget:FindFirstChild("_DamageHighlight_")
+	if not highlight or not highlight.Enabled then
+		if mouse1press then mouse1press() end
+	else
+		if mouse1release then mouse1release() end
+	end
+end)
+
+-- // PLAYER ESP //
+local OUTLINE_TRANS       = 0
+local TEAMMATE_FILL_TRANS = 0.55
+local ENEMY_FILL_TRANS    = 0.8
+local TEAMMATE_ICON_SIZE  = 32
+local ENEMY_ICON_SIZE     = 30
+local ESPObjects = {}
+local ESPConnections = {}
+
+local function getTeamColor(player)
+	-- Use the player's actual TeamColor so orange teams get orange, blue teams get blue, etc.
+	if player.TeamColor then
+		return player.TeamColor.Color
+	end
+	return Color3.fromRGB(255, 80, 80) -- fallback red for teamless enemies
+end
+
+local function RemoveNametag(character)
+	local head = character:FindFirstChild("Head")
+	if not head then return end
+	local tag = head:FindFirstChild("Nametag")
+	if tag then tag:Destroy() end
+end
+
+local function DestroyESP(player)
+	if ESPObjects[player] then
+		for _, v in pairs(ESPObjects[player]) do if v and v.Parent then v:Destroy() end end
+		ESPObjects[player] = nil
+	end
+	if ESPConnections[player] then ESPConnections[player]:Disconnect(); ESPConnections[player] = nil end
+end
+
+local function CreateESP(player)
+	if player == LocalPlayer or not PlayerESPEnabled then return end
+	local function Setup(character)
+		DestroyESP(player)
+		RemoveNametag(character)
+		local humanoid = character:WaitForChild("Humanoid")
+		local root     = character:WaitForChild("HumanoidRootPart")
+		local head     = character:WaitForChild("Head")
+		local teammate = isTeammate(player)
+		local teamCol  = getTeamColor(player)
+
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "PlayerHighlight"
+		highlight.Adornee = character
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		highlight.OutlineTransparency = OUTLINE_TRANS
+		highlight.FillColor = teamCol
+		highlight.OutlineColor = teamCol
+		highlight.FillTransparency = teammate and TEAMMATE_FILL_TRANS or ENEMY_FILL_TRANS
+		highlight.Parent = character
+
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "ESPBillboard"; billboard.Adornee = head; billboard.AlwaysOnTop = true; billboard.LightInfluence = 0; billboard.Parent = game.CoreGui
+
+		local kitIcon = Instance.new("ImageLabel")
+		kitIcon.Name = "KitIcon"; kitIcon.BackgroundTransparency = 0.2; kitIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 25); kitIcon.BorderSizePixel = 0; kitIcon.ScaleType = Enum.ScaleType.Fit; kitIcon.Image = ""; kitIcon.Parent = billboard
+		Instance.new("UICorner", kitIcon).CornerRadius = UDim.new(0, 5)
+
+		local topLabel, botLabel
+		if teammate then
+			billboard.Size = UDim2.new(0, TEAMMATE_ICON_SIZE, 0, TEAMMATE_ICON_SIZE); billboard.StudsOffset = Vector3.new(0, 3.2, 0)
+			kitIcon.Size = UDim2.new(1, 0, 1, 0); kitIcon.Position = UDim2.new(0, 0, 0, 0)
+		else
+			local icoS = ENEMY_ICON_SIZE
+			billboard.Size = UDim2.new(0, 160, 0, icoS + 4); billboard.StudsOffset = Vector3.new(0, 2.2, 0)
+			kitIcon.Size = UDim2.new(0, icoS, 0, icoS); kitIcon.Position = UDim2.new(0, 0, 0.5, -(icoS / 2))
+			local textOffset = icoS + 4
+			topLabel = Instance.new("TextLabel"); topLabel.Size = UDim2.new(1, -textOffset, 0, 22); topLabel.Position = UDim2.new(0, textOffset, 0, 0); topLabel.BackgroundTransparency = 1; topLabel.TextColor3 = Color3.fromRGB(255, 255, 255); topLabel.TextStrokeTransparency = 0; topLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0); topLabel.TextSize = 13; topLabel.Font = Enum.Font.GothamBold; topLabel.TextXAlignment = Enum.TextXAlignment.Left; topLabel.Parent = billboard
+			botLabel = Instance.new("TextLabel"); botLabel.Size = UDim2.new(1, -textOffset, 0, 18); botLabel.Position = UDim2.new(0, textOffset, 0, 22); botLabel.BackgroundTransparency = 1; botLabel.TextColor3 = Color3.fromRGB(220, 220, 220); botLabel.TextStrokeTransparency = 0; botLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0); botLabel.TextSize = 12; botLabel.Font = Enum.Font.GothamBold; botLabel.TextXAlignment = Enum.TextXAlignment.Left; botLabel.Parent = billboard
+		end
+		ESPObjects[player] = { highlight, billboard }
+
+		local connection
+		connection = RunService.RenderStepped:Connect(function()
+			if not character or not character.Parent then connection:Disconnect(); return end
+
+			-- Re-apply highlight if it got removed by the game (death animations, respawn, etc.)
+			if PlayerESPEnabled then
+				local existing = character:FindFirstChild("PlayerHighlight")
+				if not existing then
+					-- Recreate a fresh highlight parented back to the character
+					highlight.Parent = character
+				elseif existing ~= highlight then
+					-- A duplicate snuck in; destroy it and keep ours
+					existing:Destroy()
+					highlight.Parent = character
+				end
+			end
+
+			-- Keep team colour up to date in case the player changes teams mid-game
+			local currentTeamCol = getTeamColor(player)
+			highlight.FillColor = currentTeamCol
+			highlight.OutlineColor = currentTeamCol
+
+			if not teammate then
+				local hp   = math.floor(humanoid.Health)
+				local dist = math.floor((Camera.CFrame.Position - root.Position).Magnitude)
+				if topLabel then topLabel.Text = hp .. " HP" end
+				if botLabel then botLabel.Text = dist .. "m" end
+			end
+		end)
+		ESPConnections[player] = connection
+		local _, kitImg = getKitInfo(player); kitIcon.Image = kitImg
+	end
+	if player.Character then Setup(player.Character) end
+	player.CharacterAdded:Connect(function(char) if PlayerESPEnabled then Setup(char) end end)
+end
+
+-- // PERIODIC HIGHLIGHT REAPPLICATION //
+-- Belt-and-suspenders: every 2 seconds walk every tracked player and force the
+-- highlight back onto their character if something yanked it off.
+task.spawn(function()
+	while true do
+		task.wait(2)
+		if PlayerESPEnabled then
+			for player, objs in pairs(ESPObjects) do
+				local highlight = objs[1]
+				if highlight and player.Character and player.Character.Parent then
+					if not player.Character:FindFirstChild("PlayerHighlight") then
+						highlight.Parent = player.Character
+					end
+				end
+			end
+		end
+	end
+end)
+
+local function setPlayerESP(enabled)
+	PlayerESPEnabled = enabled
+	if enabled then for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end else for _, p in pairs(Players:GetPlayers()) do DestroyESP(p) end end
+end
+
+-- // STAR & BEE ESP //
+local function createSpecialESP(obj, iconId, isBee)
+	local part = getRoot(obj)
+	if not part then return end
+	local gui = Instance.new("BillboardGui"); gui.Name = isBee and "BeeESP" or "StarESP"; gui.Size = UDim2.new(0, 36, 0, 52); gui.StudsOffset = Vector3.new(0, 3.5, 0); gui.AlwaysOnTop = true; gui.Adornee = part; gui.Enabled = isBee and BeeESPEnabled or StarESPEnabled; gui.Parent = part
+	local card = Instance.new("Frame", gui); card.Size = UDim2.new(1, 0, 0, 35); card.BackgroundColor3 = Color3.fromRGB(18, 18, 18); card.BackgroundTransparency = 0.28; card.BorderSizePixel = 0; Instance.new("UICorner", card).CornerRadius = UDim.new(0, 6)
+	local icon = Instance.new("ImageLabel", card); icon.Size = UDim2.new(0, 22, 0, 22); icon.Position = UDim2.new(0.5, -11, 0.5, -11); icon.BackgroundTransparency = 1; icon.Image = iconId; icon.ScaleType = Enum.ScaleType.Fit
+	local distLabel = Instance.new("TextLabel", gui); distLabel.Size = UDim2.new(1, 0, 0, 14); distLabel.Position = UDim2.new(0, 0, 0, 38); distLabel.BackgroundTransparency = 1; distLabel.Font = Enum.Font.GothamBold; distLabel.TextSize = 10; distLabel.TextColor3 = Color3.fromRGB(255, 255, 255); distLabel.Text = "-- m"
+	if isBee then beeESPObjects[obj] = {part = part, label = distLabel, gui = gui} else starESPObjects[obj] = {part = part, label = distLabel, gui = gui} end
+end
+
+local function handleSpecialAdded(obj)
+	if STAR_ICONS[obj.Name] then createSpecialESP(obj, STAR_ICONS[obj.Name], false)
+	elseif obj.Name == "Bee" then createSpecialESP(obj, BEE_IMAGE, true) end
+end
+workspace.DescendantAdded:Connect(handleSpecialAdded)
+for _, obj in ipairs(workspace:GetDescendants()) do handleSpecialAdded(obj) end
+
+-- // METAL ESP //
+local function setMetalESP(enabled)
+	MetalESPEnabled = enabled
+	for _, obj in ipairs(workspace:GetChildren()) do
+		if obj:IsA("BillboardGui") and obj.Name == "LootText" then obj.Enabled = enabled end
+		if obj.Name == "LootCircle" then obj.Transparency = enabled and 0.35 or 1 end
+	end
+end
+
+local function addESP(part)
+	if part:FindFirstChild("LootESP") then return end
+	local tag = Instance.new("StringValue"); tag.Name = "LootESP"; tag.Parent = part
+	local circle = Instance.new("Part"); circle.Name = "LootCircle"; circle.Shape = Enum.PartType.Cylinder; circle.Size = Vector3.new(0.1, 5, 5); circle.CFrame = CFrame.new(part.Position - Vector3.new(0, part.Size.Y / 2 + 0.05, 0)) * CFrame.Angles(0, 0, math.rad(90)); circle.Anchored = false; circle.CanCollide = false; circle.Color = Color3.fromRGB(255, 210, 50); circle.Material = Enum.Material.Neon; circle.Transparency = MetalESPEnabled and 0.35 or 1; circle.Parent = workspace
+	local weld = Instance.new("WeldConstraint"); weld.Part0 = circle; weld.Part1 = part; weld.Parent = circle
+	local billboard = Instance.new("BillboardGui"); billboard.Name = "LootText"; billboard.Adornee = part; billboard.Size = UDim2.new(0, 120, 0, 50); billboard.StudsOffset = Vector3.new(0, 2.5, 0); billboard.AlwaysOnTop = true; billboard.Enabled = MetalESPEnabled; billboard.Parent = workspace
+	local lootLabel = Instance.new("TextLabel"); lootLabel.Size = UDim2.new(1, 0, 0.55, 0); lootLabel.BackgroundTransparency = 1; lootLabel.Text = "Loot"; lootLabel.TextColor3 = Color3.fromRGB(255, 210, 50); lootLabel.TextSize = 15; lootLabel.Font = Enum.Font.GothamBold; lootLabel.Parent = billboard
+	local distLabel = Instance.new("TextLabel"); distLabel.Name = "DistLabel"; distLabel.Size = UDim2.new(1, 0, 0.45, 0); distLabel.Position = UDim2.new(0, 0, 0.55, 0); distLabel.BackgroundTransparency = 1; distLabel.Text = "0m"; distLabel.TextColor3 = Color3.fromRGB(255, 255, 255); distLabel.TextSize = 13; distLabel.Font = Enum.Font.GothamBold; distLabel.Parent = billboard
+	part.AncestryChanged:Connect(function() if not part:IsDescendantOf(workspace) then circle:Destroy(); billboard:Destroy() end end)
+end
+
+RunService.Heartbeat:Connect(function()
+	local char = LocalPlayer.Character; local root = char and char:FindFirstChild("HumanoidRootPart")
+	if not root then return end
+	local pos = root.Position
+	if MetalESPEnabled then
+		for _, obj in ipairs(workspace:GetChildren()) do
+			if obj:IsA("BillboardGui") and obj.Name == "LootText" then
+				local dist = math.floor((pos - obj.Adornee.Position).Magnitude)
+				local lbl = obj:FindFirstChild("DistLabel"); if lbl then lbl.Text = dist .. "m" end
+				obj.Enabled = dist <= 500
+			end
+		end
+	end
+	if StarESPEnabled then for obj, data in pairs(starESPObjects) do if obj.Parent then data.label.Text = math.floor((pos - data.part.Position).Magnitude) .. " m" end end end
+	if BeeESPEnabled then for obj, data in pairs(beeESPObjects) do if obj.Parent then data.label.Text = math.floor((pos - data.part.Position).Magnitude) .. " m" end end end
+end)
+
+local function scanModel(model) if model.Name == "Model" then for _, child in ipairs(model:GetChildren()) do if child.Name == "Part" and child:IsA("BasePart") then addESP(child) end end end end
+task.spawn(function() for _, obj in ipairs(workspace:GetChildren()) do scanModel(obj) end end)
+workspace.ChildAdded:Connect(function(obj) task.wait(0.1); scanModel(obj) end)
+
+-- // KIT RENDER //
+local kitRenderGui = nil; local kitPlayerRows = {}; local kitRunning = false
+local function updateKitRow(player, scrollFrame)
+	if player == LocalPlayer then return end
+	local kit = player:GetAttribute("PlayingAsKits")
+	if not kit or kit == "" then if kitPlayerRows[player] then kitPlayerRows[player]:Destroy(); kitPlayerRows[player] = nil end; return end
+	if not kitPlayerRows[player] then
+		local row = Instance.new("Frame"); row.Size = UDim2.new(1, -10, 0, 45); row.BackgroundColor3 = Color3.fromRGB(40, 40, 45); row.Parent = scrollFrame; Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+		local kitImage = Instance.new("ImageLabel"); kitImage.Name = "KitImage"; kitImage.Size = UDim2.new(0, 40, 0, 40); kitImage.Position = UDim2.new(0, 3, 0.5, -20); kitImage.BackgroundColor3 = Color3.fromRGB(50, 50, 55); kitImage.ScaleType = Enum.ScaleType.Fit; kitImage.Parent = row; Instance.new("UICorner", kitImage).CornerRadius = UDim.new(0, 4)
+		local nameLabel = Instance.new("TextLabel"); nameLabel.Name = "PlayerName"; nameLabel.Size = UDim2.new(1, -55, 0, 22); nameLabel.Position = UDim2.new(0, 50, 0, 2); nameLabel.BackgroundTransparency = 1; nameLabel.TextSize = 14; nameLabel.Font = Enum.Font.GothamBold; nameLabel.TextXAlignment = Enum.TextXAlignment.Left; nameLabel.Parent = row
+		local kitLabel = Instance.new("TextLabel"); kitLabel.Name = "KitName"; kitLabel.Size = UDim2.new(1, -55, 0, 18); kitLabel.Position = UDim2.new(0, 50, 0, 24); kitLabel.BackgroundTransparency = 1; kitLabel.TextColor3 = Color3.fromRGB(180, 180, 180); kitLabel.TextSize = 12; kitLabel.Font = Enum.Font.Gotham; kitLabel.TextXAlignment = Enum.TextXAlignment.Left; kitLabel.Parent = row
+		kitPlayerRows[player] = row
+	end
+	local row = kitPlayerRows[player]; local kitName, kitImage = getKitInfo(player)
+	row.PlayerName.Text = player.DisplayName; row.PlayerName.TextColor3 = player.TeamColor and player.TeamColor.Color or Color3.fromRGB(255, 255, 255); row.KitName.Text = kitName; row.KitImage.Image = kitImage
+end
+
+local function setKitRender(enabled)
+	KitRenderEnabled = enabled
+	if enabled then
+		kitRenderGui = Instance.new("ScreenGui"); kitRenderGui.Name = "KitViewer"; kitRenderGui.DisplayOrder = 999998; kitRenderGui.Parent = LocalPlayer.PlayerGui
+		local frame = Instance.new("Frame"); frame.Size = UDim2.new(0, 340, 0, 400); frame.Position = UDim2.new(0.5, 150, 0.5, -200); frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35); frame.Parent = kitRenderGui; Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+		local scrollFrame = Instance.new("ScrollingFrame"); scrollFrame.Size = UDim2.new(1, -10, 1, -45); scrollFrame.Position = UDim2.new(0, 5, 0, 40); scrollFrame.BackgroundTransparency = 1; scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y; scrollFrame.Parent = frame
+		Instance.new("UIListLayout", scrollFrame).Padding = UDim.new(0, 5)
+		kitRunning = true; task.spawn(function() while kitRunning do task.wait(1); for _, p in pairs(Players:GetPlayers()) do updateKitRow(p, scrollFrame) end end end)
+	else kitRunning = false; if kitRenderGui then kitRenderGui:Destroy() end end
+end
+
+-- // JOIN NOTIFIER //
+local notifierConnection = nil
+local function setJoinNotifier(enabled)
+	JoinNotifyEnabled = enabled
+	if enabled then notifierConnection = Players.PlayerAdded:Connect(function(player) if JoinNotifyEnabled then StarterGui:SetCore("SendNotification", {Title = "Player Joined", Text = player.Name .. " joined the game", Duration = 4}) end end)
+	else if notifierConnection then notifierConnection:Disconnect() end end
+end
+
+-- // GUI MAIN //
+local gui = Instance.new("ScreenGui"); gui.Name = "lxluware"; gui.ResetOnSpawn = false; gui.DisplayOrder = 999999; gui.Parent = LocalPlayer.PlayerGui
+local main = Instance.new("Frame"); main.Size = UDim2.new(0, 260, 0, 0); main.Position = UDim2.new(0.5, -130, 0.5, -160); main.BackgroundColor3 = Color3.fromRGB(17, 17, 17); main.BorderSizePixel = 0; main.AutomaticSize = Enum.AutomaticSize.Y; main.Visible = false; main.Parent = gui
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+local titleBar = Instance.new("Frame"); titleBar.Size = UDim2.new(1, 0, 0, 36); titleBar.BackgroundColor3 = Color3.fromRGB(26, 26, 26); titleBar.BorderSizePixel = 0; titleBar.Parent = main; Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 10)
+local titleFix = Instance.new("Frame"); titleFix.Size = UDim2.new(1, 0, 0, 10); titleFix.Position = UDim2.new(0, 0, 1, -10); titleFix.BackgroundColor3 = Color3.fromRGB(26, 26, 26); titleFix.BorderSizePixel = 0; titleFix.Parent = titleBar
+local titleLabel = Instance.new("TextLabel"); titleLabel.Size = UDim2.new(1, -80, 1, 0); titleLabel.Position = UDim2.new(0, 10, 0, 0); titleLabel.BackgroundTransparency = 1; titleLabel.Text = "lxluware"; titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255); titleLabel.TextSize = 13; titleLabel.Font = Enum.Font.GothamBold; titleLabel.TextXAlignment = Enum.TextXAlignment.Left; titleLabel.Parent = titleBar
+
+local dragging, dragStart, startPos
+titleBar.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true; dragStart = i.Position; startPos = main.Position end end)
+titleBar.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+UserInputService.InputChanged:Connect(function(i) if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then local d = i.Position - dragStart; main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y) end end)
+
+local tabBar = Instance.new("Frame"); tabBar.Size = UDim2.new(1, 0, 0, 30); tabBar.Position = UDim2.new(0, 0, 0, 36); tabBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20); tabBar.BorderSizePixel = 0; tabBar.Parent = main
+local tabButtonsContainer = Instance.new("Frame"); tabButtonsContainer.Size = UDim2.new(1, 0, 1, 0); tabButtonsContainer.BackgroundTransparency = 1; tabContainerLayout = Instance.new("UIListLayout", tabButtonsContainer); tabContainerLayout.FillDirection = Enum.FillDirection.Horizontal; tabButtonsContainer.Parent = tabBar
+local contentArea = Instance.new("Frame"); contentArea.Size = UDim2.new(1, 0, 0, 0); contentArea.Position = UDim2.new(0, 0, 0, 66); contentArea.BackgroundTransparency = 1; contentArea.AutomaticSize = Enum.AutomaticSize.Y; contentArea.Parent = main
+
+local tabPages, tabButtons = {}, {}
+local function switchTab(name)
+	for n, p in pairs(tabPages) do p.Visible = (n == name) end
+	for n, b in pairs(tabButtons) do b.TextColor3 = (n == name) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(90, 90, 90); local l = b:FindFirstChild("ActiveLine"); if l then l.Visible = (n == name) end end
+end
+
+local function makeTab(name)
+	local btn = Instance.new("TextButton"); btn.Size = UDim2.new(0, 80, 1, 0); btn.BackgroundTransparency = 1; btn.Text = name; btn.TextColor3 = Color3.fromRGB(90, 90, 90); btn.TextSize = 11; btn.Font = Enum.Font.GothamBold; btn.Parent = tabButtonsContainer
+	local activeLine = Instance.new("Frame"); activeLine.Name = "ActiveLine"; activeLine.Size = UDim2.new(1, -16, 0, 1); activeLine.Position = UDim2.new(0, 8, 1, -1); activeLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255); activeLine.Visible = false; activeLine.Parent = btn
+	local page = Instance.new("Frame"); page.Size = UDim2.new(1, 0, 0, 0); page.BackgroundTransparency = 1; page.AutomaticSize = Enum.AutomaticSize.Y; page.Visible = false; page.Parent = contentArea
+	Instance.new("UIListLayout", page).Padding = UDim.new(0, 4); Instance.new("UIPadding", page).PaddingLeft = UDim.new(0, 8); page.UIPadding.PaddingRight = UDim.new(0, 8); page.UIPadding.PaddingTop = UDim.new(0, 8); page.UIPadding.PaddingBottom = UDim.new(0, 8)
+	tabPages[name], tabButtons[name] = page, btn
+	btn.MouseButton1Click:Connect(function() switchTab(name) end)
+	return page
+end
+
+local function makeToggle(parent, labelText, onEnable, onDisable)
+	local enabled = false
+	local row = Instance.new("Frame"); row.Size = UDim2.new(1, 0, 0, 34); row.BackgroundColor3 = Color3.fromRGB(26, 26, 26); row.Parent = parent; Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+	local stroke = Instance.new("UIStroke", row); stroke.Color = Color3.fromRGB(40, 40, 40); stroke.Thickness = 0.5
+	local lbl = Instance.new("TextLabel"); lbl.Size = UDim2.new(1, -50, 1, 0); lbl.Position = UDim2.new(0, 10, 0, 0); lbl.BackgroundTransparency = 1; lbl.Text = labelText; lbl.TextColor3 = Color3.fromRGB(120, 120, 120); lbl.TextSize = 12; lbl.Font = Enum.Font.Gotham; lbl.TextXAlignment = Enum.TextXAlignment.Left; lbl.Parent = row
+	local pill = Instance.new("Frame"); pill.Size = UDim2.new(0, 32, 0, 16); pill.Position = UDim2.new(1, -42, 0.5, -8); pill.BackgroundColor3 = Color3.fromRGB(42, 42, 42); pill.Parent = row; Instance.new("UICorner", pill).CornerRadius = UDim.new(1, 0)
+	local dot = Instance.new("Frame"); dot.Size = UDim2.new(0, 10, 0, 10); dot.Position = UDim2.new(0, 3, 0.5, -5); dot.BackgroundColor3 = Color3.fromRGB(80, 80, 80); dot.Parent = pill; Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+	local btn = Instance.new("TextButton", row); btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundTransparency = 1; btn.Text = ""
+	btn.MouseButton1Click:Connect(function()
+		enabled = not enabled
+		row.BackgroundColor3 = enabled and Color3.fromRGB(22, 22, 22) or Color3.fromRGB(26, 26, 26)
+		stroke.Color = enabled and Color3.fromRGB(220, 220, 220) or Color3.fromRGB(40, 40, 40)
+		lbl.TextColor3 = enabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(120, 120, 120)
+		pill.BackgroundColor3 = enabled and Color3.fromRGB(240, 240, 240) or Color3.fromRGB(42, 42, 42)
+		dot.BackgroundColor3 = enabled and Color3.fromRGB(17, 17, 17) or Color3.fromRGB(80, 80, 80)
+		dot.Position = enabled and UDim2.new(0, 19, 0.5, -5) or UDim2.new(0, 3, 0.5, -5)
+		if enabled then onEnable() else onDisable() end
+	end)
+end
+
+local function makeKeybind(parent, labelText, currentKey, onUpdate)
+	local row = Instance.new("Frame"); row.Size = UDim2.new(1, 0, 0, 34); row.BackgroundColor3 = Color3.fromRGB(26, 26, 26); row.Parent = parent; Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+	local stroke = Instance.new("UIStroke", row); stroke.Color = Color3.fromRGB(40, 40, 40); stroke.Thickness = 0.5
+	local lbl = Instance.new("TextLabel"); lbl.Size = UDim2.new(1, -80, 1, 0); lbl.Position = UDim2.new(0, 10, 0, 0); lbl.BackgroundTransparency = 1; lbl.Text = labelText; lbl.TextColor3 = Color3.fromRGB(120, 120, 120); lbl.TextSize = 12; lbl.Font = Enum.Font.Gotham; lbl.TextXAlignment = Enum.TextXAlignment.Left; lbl.Parent = row
+	local btn = Instance.new("TextButton"); btn.Size = UDim2.new(0, 60, 0, 22); btn.Position = UDim2.new(1, -70, 0.5, -11); btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40); btn.Text = currentKey.Name; btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.TextSize = 10; btn.Font = Enum.Font.GothamBold; btn.Parent = row; Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+	local isBinding = false
+	btn.MouseButton1Click:Connect(function()
+		if isBinding then return end; isBinding = true; btn.Text = "..."
+		local connection; connection = UserInputService.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Keyboard then
+				onUpdate(input.KeyCode); btn.Text = input.KeyCode.Name; isBinding = false; connection:Disconnect()
+			end
+		end)
+	end)
+end
+
+-- // BUILD TABS //
+local combatPage = makeTab("Combat")
+makeToggle(combatPage, "Aimassist", function() AimlockEnabled = true end, function() AimlockEnabled = false; IsAiming = false; CurrentTarget = nil; if mouse1release then mouse1release() end end)
+makeKeybind(combatPage, "Aim Keybind", AimKey, function(newKey) AimKey = newKey end)
+
+local espPage = makeTab("ESP")
+makeToggle(espPage, "Player ESP", function() setPlayerESP(true) end, function() setPlayerESP(false) end)
+makeToggle(espPage, "Metal ESP", function() setMetalESP(true) end, function() setMetalESP(false) end)
+makeToggle(espPage, "Star ESP", function() StarESPEnabled = true; for _, d in pairs(starESPObjects) do d.gui.Enabled = true end end, function() StarESPEnabled = false; for _, d in pairs(starESPObjects) do d.gui.Enabled = false end end)
+makeToggle(espPage, "Bee ESP", function() BeeESPEnabled = true; for _, d in pairs(beeESPObjects) do d.gui.Enabled = true end end, function() BeeESPEnabled = false; for _, d in pairs(beeESPObjects) do d.gui.Enabled = false end end)
+
+local miscPage = makeTab("Misc")
+makeToggle(miscPage, "Kit Render", function() setKitRender(true) end, function() setKitRender(false) end)
+makeToggle(miscPage, "Join Notifier", function() setJoinNotifier(true) end, function() setJoinNotifier(false) end)
+
+-- // ONE-TIME BUTTON HELPER //
+local function makeButton(parent, labelText, onClick)
+	local fired = false
+	local row = Instance.new("Frame"); row.Size = UDim2.new(1, 0, 0, 34); row.BackgroundColor3 = Color3.fromRGB(26, 26, 26); row.Parent = parent; Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+	local stroke = Instance.new("UIStroke", row); stroke.Color = Color3.fromRGB(40, 40, 40); stroke.Thickness = 0.5
+	local lbl = Instance.new("TextLabel"); lbl.Size = UDim2.new(1, -10, 1, 0); lbl.Position = UDim2.new(0, 10, 0, 0); lbl.BackgroundTransparency = 1; lbl.Text = labelText; lbl.TextColor3 = Color3.fromRGB(200, 200, 200); lbl.TextSize = 12; lbl.Font = Enum.Font.GothamBold; lbl.TextXAlignment = Enum.TextXAlignment.Left; lbl.Parent = row
+	local btn = Instance.new("TextButton", row); btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundTransparency = 1; btn.Text = ""
+	btn.MouseButton1Click:Connect(function()
+		if fired then return end
+		fired = true
+		stroke.Color = Color3.fromRGB(80, 200, 120)
+		lbl.TextColor3 = Color3.fromRGB(80, 200, 120)
+		lbl.Text = "✓ Done"
+		onClick()
+	end)
+end
+
+-- // REMOVE TEXTURES BUTTON //
+makeButton(miscPage, "Remove Textures", function()
+	local Lighting = game:GetService("Lighting")
+
+	for _, child in ipairs(Lighting:GetChildren()) do
+		if child.Name ~= "GameSounds" then child:Destroy() end
+	end
+
+	Lighting.Ambient              = Color3.fromRGB(135, 135, 135)
+	Lighting.OutdoorAmbient       = Color3.fromRGB(120, 120, 120)
+	Lighting.Brightness           = 2
+	Lighting.ExposureCompensation = 0
+	Lighting.ClockTime            = 14
+	Lighting.ColorShift_Top       = Color3.fromRGB(80, 80, 80)
+	Lighting.ColorShift_Bottom    = Color3.fromRGB(110, 110, 110)
+
+	local sky = Instance.new("Sky")
+	sky.Name = "GreySky"
+	sky.SkyboxBk = "rbxassetid://11457548274"; sky.SkyboxDn = "rbxassetid://11457548274"; sky.SkyboxFt = "rbxassetid://11457548274"
+	sky.SkyboxLf = "rbxassetid://11457548274"; sky.SkyboxRt = "rbxassetid://11457548274"; sky.SkyboxUp = "rbxassetid://11457548274"
+	sky.CelestialBodiesShown = false; sky.StarCount = 0; sky.Parent = Lighting
+
+	local BLOCK_COLORS = {
+		wool_blue=Color3.fromRGB(72,96,190),wool_brown=Color3.fromRGB(125,88,52),wool_cyan=Color3.fromRGB(58,170,185),wool_green=Color3.fromRGB(92,150,60),wool_orange=Color3.fromRGB(225,145,50),wool_pink=Color3.fromRGB(230,155,180),wool_purple=Color3.fromRGB(145,75,190),wool_red=Color3.fromRGB(185,58,58),wool_white=Color3.fromRGB(240,240,240),wool_yellow=Color3.fromRGB(235,210,70),
+		clay=Color3.fromRGB(168,152,145),clay_black=Color3.fromRGB(38,34,34),clay_blue=Color3.fromRGB(88,108,185),clay_dark_brown=Color3.fromRGB(86,58,42),clay_dark_green=Color3.fromRGB(58,84,58),clay_gray=Color3.fromRGB(158,158,160),clay_green=Color3.fromRGB(108,148,90),clay_orange=Color3.fromRGB(220,125,68),clay_pink=Color3.fromRGB(220,162,168),clay_purple=Color3.fromRGB(142,92,182),clay_tan=Color3.fromRGB(202,178,148),clay_white=Color3.fromRGB(236,232,228),clay_yellow=Color3.fromRGB(228,198,82),clay_red=Color3.fromRGB(176,78,66),
+		andesite=Color3.fromRGB(128,130,134),andesite_polished=Color3.fromRGB(172,174,178),cobblestone=Color3.fromRGB(118,118,120),diorite=Color3.fromRGB(214,214,216),diorite_polished=Color3.fromRGB(228,228,230),granite=Color3.fromRGB(158,108,92),granite_polished=Color3.fromRGB(184,128,110),stone=Color3.fromRGB(122,122,126),stone_brick=Color3.fromRGB(112,112,116),stone_pillar=Color3.fromRGB(126,126,130),stone_slab=Color3.fromRGB(132,132,136),stone_tiles=Color3.fromRGB(96,98,104),slate_brick=Color3.fromRGB(66,70,78),slate_tiles=Color3.fromRGB(54,58,66),
+		marble_pillar=Color3.fromRGB(238,236,230),galactite=Color3.fromRGB(92,104,126),galactite_brick=Color3.fromRGB(82,94,116),kobblak=Color3.fromRGB(42,42,48),bedrock=Color3.fromRGB(58,58,62),
+		dirt=Color3.fromRGB(154,111,72),grass=Color3.fromRGB(126,168,78),moss_block=Color3.fromRGB(126,168,78),haybale=Color3.fromRGB(220,190,78),pumpkin_block=Color3.fromRGB(225,125,42),
+		red_sand=Color3.fromRGB(196,110,62),sand=Color3.fromRGB(228,214,170),sandstone=Color3.fromRGB(220,206,156),sandstone_polished=Color3.fromRGB(228,214,166),sandstone_smooth=Color3.fromRGB(224,210,160),
+		red_sandstone=Color3.fromRGB(184,92,36),red_sandstone_polished=Color3.fromRGB(194,102,46),red_sandstone_smooth=Color3.fromRGB(188,96,40),
+		birch_log=Color3.fromRGB(220,208,172),hickory_log=Color3.fromRGB(138,96,60),oak_log=Color3.fromRGB(150,111,67),spruce_log=Color3.fromRGB(92,68,42),
+		wood_plank_birch=Color3.fromRGB(225,205,148),wood_plank_maple=Color3.fromRGB(192,132,82),wood_plank_spruce=Color3.fromRGB(98,72,44),wood_plank_oak=Color3.fromRGB(196,146,102),
+		diamond_block=Color3.fromRGB(92,228,212),diamond_ore=Color3.fromRGB(72,188,222),emerald_block=Color3.fromRGB(46,198,92),copper_block=Color3.fromRGB(194,118,82),gold_block=Color3.fromRGB(245,205,52),guilded_iron=Color3.fromRGB(212,184,94),iron_block=Color3.fromRGB(210,212,216),steel_block=Color3.fromRGB(132,140,152),
+		obsidian=Color3.fromRGB(24,18,38),magma_block=Color3.fromRGB(218,88,28),glowstone=Color3.fromRGB(248,202,96),
+		brick=Color3.fromRGB(165,88,68),ceramic=Color3.fromRGB(212,132,82),concrete_green=Color3.fromRGB(78,120,62),
+		fisherman_coral=Color3.fromRGB(108,205,222),
+		glass=Color3.fromRGB(190,225,235),ice=Color3.fromRGB(190,225,248),snow=Color3.fromRGB(245,247,252),
+		smoke_block=Color3.fromRGB(132,134,140),tnt=Color3.fromRGB(208,58,48),void_block=Color3.fromRGB(14,10,28),
+		aquamarine_lantern=Color3.fromRGB(92,215,198),scaffold=Color3.fromRGB(220,188,112),christmas_scaffold=Color3.fromRGB(192,48,48),
+		team_door=Color3.fromRGB(72,132,215),arrow_board=Color3.fromRGB(248,208,48),
+		wood_sword=Color3.fromRGB(168,128,78),wood_pickaxe=Color3.fromRGB(158,118,72),
+		world_edit_wand=Color3.fromRGB(92,175,255),world_guard_wand=Color3.fromRGB(255,175,96),
+	}
+
+	local function getColor(rawName)
+		local name = rawName:lower():gsub(" ","_"):gsub("-","_")
+		if BLOCK_COLORS[name] then return BLOCK_COLORS[name] end
+		local bestKey, bestLen = nil, 0
+		for key in pairs(BLOCK_COLORS) do
+			if name:find(key, 1, true) and #key > bestLen then bestKey = key; bestLen = #key end
+		end
+		return bestKey and BLOCK_COLORS[bestKey] or nil
+	end
+
+	for _, desc in ipairs(workspace:GetDescendants()) do
+		if desc:IsA("BasePart") then
+			for _, child in ipairs(desc:GetChildren()) do
+				if child:IsA("Texture") or child:IsA("Decal") or child:IsA("SurfaceAppearance") then child:Destroy()
+				elseif child:IsA("SpecialMesh") then child.TextureId = "" end
+			end
+			desc.Material = Enum.Material.SmoothPlastic
+			local color = getColor(desc.Name)
+			if not color then
+				local ancestor = desc.Parent
+				while ancestor and ancestor ~= workspace do
+					color = getColor(ancestor.Name)
+					if color then break end
+					ancestor = ancestor.Parent
+				end
+			end
+			desc.Color = color or Color3.fromRGB(160, 160, 160)
+		end
+	end
+
+	workspace.DescendantAdded:Connect(function(obj)
+		task.defer(function()
+			if not obj or not obj.Parent then return end
+			if obj:IsA("BasePart") then
+				for _, child in ipairs(obj:GetChildren()) do
+					if child:IsA("Texture") or child:IsA("Decal") or child:IsA("SurfaceAppearance") then child:Destroy()
+					elseif child:IsA("SpecialMesh") then child.TextureId = "" end
+				end
+				obj.Material = Enum.Material.SmoothPlastic
+				local color = getColor(obj.Name)
+				if not color then
+					local ancestor = obj.Parent
+					while ancestor and ancestor ~= workspace do
+						color = getColor(ancestor.Name)
+						if color then break end
+						ancestor = ancestor.Parent
+					end
+				end
+				obj.Color = color or Color3.fromRGB(160, 160, 160)
+			end
+		end)
+	end)
+end)
+
+switchTab("Combat")
+UserInputService.InputBegan:Connect(function(i, g) if not g and i.KeyCode == Enum.KeyCode.RightShift then main.Visible = not main.Visible end end)
