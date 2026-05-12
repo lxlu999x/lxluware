@@ -1,2 +1,2 @@
 # lxluware
-robloxbedwars script
+right shift to open
