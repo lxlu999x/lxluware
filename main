@@ -137,7 +137,7 @@ end
 -- // AIMLOCK SETTINGS //
 local AimKey     = Enum.KeyCode.K
 local Max_Range  = 50
-local Smoothness = 0.35
+local Smoothness = 0.45
 
 -- // AIMLOCK STATE //
 local AimlockEnabled = false
@@ -152,85 +152,37 @@ local function isAlive(character)
 end
 
 -- Always returns the single closest enemy to the local player right now
+local AimFOV = 160 -- degrees, how wide your facing cone is
+
 local function getClosestTarget()
 	local char = LocalPlayer.Character
 	if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
 	local myRoot = char.HumanoidRootPart
-	local best, bestDist = nil, Max_Range
+	local best, bestScore = nil, math.huge
 
 	for _, p in pairs(Players:GetPlayers()) do
 		if p ~= LocalPlayer and p.Team ~= LocalPlayer.Team and p.Character and isAlive(p.Character) then
 			local root = p.Character:FindFirstChild("HumanoidRootPart")
 			if root then
 				local worldDist = (root.Position - myRoot.Position).Magnitude
-				if worldDist <= bestDist then
-					bestDist = worldDist
-					best = p.Character
+				if worldDist <= Max_Range then
+					-- Check if they're within our FOV cone using the camera direction
+					local screenPos, onScreen = Camera:WorldToViewportPoint(root.Position)
+					if onScreen then
+						local viewportCenter = Camera.ViewportSize / 2
+						local screenDist = (Vector2.new(screenPos.X, screenPos.Y) - viewportCenter).Magnitude
+						-- Prefer targets closest to screen center (most "in front")
+						if screenDist < bestScore then
+							bestScore = screenDist
+							best = p.Character
+						end
+					end
 				end
 			end
 		end
 	end
 	return best
 end
-
-UserInputService.InputBegan:Connect(function(i, g)
-	if g then return end
-	if AimlockEnabled and i.KeyCode == AimKey then
-		IsAiming = not IsAiming
-		if IsAiming then
-			CurrentTarget = getClosestTarget()
-			if not CurrentTarget then IsAiming = false end
-		else
-			CurrentTarget = nil
-			if mouse1release then mouse1release() end
-		end
-	end
-if FreecamEnabled and i.KeyCode == FreecamKey then
-		if freecam_connection then
-			freecam_connection:Disconnect(); freecam_connection = nil
-			UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-			Camera.CameraType = Enum.CameraType.Custom
-			LocalPlayer.CameraMinZoomDistance = freecam_oldMinZoom
-			LocalPlayer.CameraMaxZoomDistance = freecam_oldMaxZoom
-			if freecam_humanoid then
-				freecam_humanoid.WalkSpeed = freecam_oldWalkSpeed
-				freecam_humanoid.JumpPower = freecam_oldJumpPower
-				freecam_humanoid = nil
-			end
-		else
-			freecam_camPos = Camera.CFrame.Position
-			local x, y = Camera.CFrame:ToOrientation()
-			freecam_pitch = math.deg(x)
-			freecam_yaw = math.deg(y)
-			Camera.CameraType = Enum.CameraType.Scriptable
-			freecam_oldMinZoom = LocalPlayer.CameraMinZoomDistance
-			freecam_oldMaxZoom = LocalPlayer.CameraMaxZoomDistance
-			LocalPlayer.CameraMinZoomDistance = 0.5
-			LocalPlayer.CameraMaxZoomDistance = 0.5
-			UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-			local character = LocalPlayer.Character
-			if character then
-				freecam_humanoid = character:FindFirstChildOfClass("Humanoid")
-				if freecam_humanoid then
-					freecam_oldWalkSpeed = freecam_humanoid.WalkSpeed
-					freecam_oldJumpPower = freecam_humanoid.JumpPower
-					freecam_humanoid.WalkSpeed = 0
-					freecam_humanoid.JumpPower = 0
-				end
-			end
-			freecam_connection = RunService.RenderStepped:Connect(function()
-				local delta = UserInputService:GetMouseDelta()
-				freecam_yaw -= delta.X * freecam_mouseSensitivity
-				freecam_pitch -= delta.Y * freecam_mouseSensitivity
-				freecam_pitch = math.clamp(freecam_pitch, -freecam_maxPitch, freecam_maxPitch)
-				local rotation = CFrame.Angles(0, math.rad(freecam_yaw), 0) * CFrame.Angles(math.rad(freecam_pitch), 0, 0)
-				local direction = freecam_updateMovement()
-				local moveVector = (rotation.LookVector * direction.Z) + (rotation.RightVector * direction.X) + Vector3.new(0, direction.Y, 0)
-				if moveVector.Magnitude > 0 then freecam_camPos += moveVector.Unit * freecam_speed end
-				Camera.CFrame = CFrame.new(freecam_camPos) * rotation
-			end
-		end
-	end)
 
 RunService:BindToRenderStep("AimLock", 201, function()  
 	if not AimlockEnabled or not IsAiming then return end
@@ -250,8 +202,8 @@ RunService:BindToRenderStep("AimLock", 201, function()
 	local torso = CurrentTarget:FindFirstChild("Torso") or CurrentTarget:FindFirstChild("UpperTorso") or CurrentTarget:FindFirstChild("HumanoidRootPart")
 	if not torso then return end
 
-	Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, torso.Position), Smoothness)
-
+    local targetCFrame = CFrame.new(Camera.CFrame.Position, torso.Position)
+    Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Smoothness * (1 - 0.85))
 	local highlight = CurrentTarget:FindFirstChild("_DamageHighlight_")
 	if not highlight or not highlight.Enabled then
 		if mouse1press then mouse1press() end
@@ -559,7 +511,8 @@ local function makeKeybind(parent, labelText, currentKey, onUpdate)
 end
 
 -- // FREECAM STATE //
-local FreecamEnabled = false
+local FreecamEnabled = false  -- is the feature allowed
+local FreecamActive = false   -- is freecam actually running right now
 local FreecamKey = Enum.KeyCode.H
 local freecam_connection = nil
 local freecam_camPos = Vector3.zero
@@ -587,7 +540,7 @@ local function freecam_updateMovement()
 end
 
 local function enableFreecam()
-	FreecamEnabled = true
+	FreecamActive = true
 	freecam_camPos = Camera.CFrame.Position
 	local x, y = Camera.CFrame:ToOrientation()
 	freecam_pitch = math.deg(x)
@@ -622,7 +575,7 @@ local function enableFreecam()
 end
 
 local function disableFreecam()
-	FreecamEnabled = false
+	FreecamActive = false
 	if freecam_connection then freecam_connection:Disconnect(); freecam_connection = nil end
 	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 	Camera.CameraType = Enum.CameraType.Custom
@@ -637,13 +590,39 @@ end
 
 -- Freecam WASD/Space/Ctrl keys (only active when freecam is on)
 UserInputService.InputBegan:Connect(function(i, g)
-	if g or not FreecamEnabled then return end
-	if i.KeyCode == Enum.KeyCode.W          then freecam_move.W    = true end
-	if i.KeyCode == Enum.KeyCode.A          then freecam_move.A    = true end
-	if i.KeyCode == Enum.KeyCode.S          then freecam_move.S    = true end
-	if i.KeyCode == Enum.KeyCode.D          then freecam_move.D    = true end
-	if i.KeyCode == Enum.KeyCode.Space      then freecam_move.Up   = true end
-	if i.KeyCode == Enum.KeyCode.LeftControl then freecam_move.Down = true end
+	if g then return end
+
+	-- AIMLOCK
+	if AimlockEnabled and i.KeyCode == AimKey then
+		IsAiming = not IsAiming
+		if IsAiming then
+			CurrentTarget = getClosestTarget()
+			if not CurrentTarget then IsAiming = false end
+		else
+			CurrentTarget = nil
+			if mouse1release then mouse1release() end
+		end
+	end
+
+	-- FREECAM KEYBIND
+	if i.KeyCode == FreecamKey then
+		if not FreecamEnabled then print("Feature off, ignoring") return end
+		if FreecamActive then
+			disableFreecam()
+		else
+			enableFreecam()
+		end
+	end
+
+	-- FREECAM WASD (only when active)
+	if FreecamActive then
+		if i.KeyCode == Enum.KeyCode.W           then freecam_move.W    = true end
+		if i.KeyCode == Enum.KeyCode.A           then freecam_move.A    = true end
+		if i.KeyCode == Enum.KeyCode.S           then freecam_move.S    = true end
+		if i.KeyCode == Enum.KeyCode.D           then freecam_move.D    = true end
+		if i.KeyCode == Enum.KeyCode.Space       then freecam_move.Up   = true end
+		if i.KeyCode == Enum.KeyCode.LeftControl then freecam_move.Down = true end
+	end
 end)
 UserInputService.InputEnded:Connect(function(i)
 	if i.KeyCode == Enum.KeyCode.W          then freecam_move.W    = false end
@@ -668,8 +647,13 @@ makeToggle(espPage, "Bee ESP", function() BeeESPEnabled = true; for _, d in pair
 local miscPage = makeTab("Misc")
 makeToggle(miscPage, "Kit Render",     function() setKitRender(true)    end, function() setKitRender(false)    end)
 makeToggle(miscPage, "Join Notifier",  function() setJoinNotifier(true)  end, function() setJoinNotifier(false)  end)
-makeToggle(miscPage, "Freecam", function() FreecamEnabled = true end, function() disableFreecam() end)
-makeKeybind(miscPage, "Freecam Keybind", Enum.KeyCode.H, function(newKey) FreecamKey = newKey end)
+makeToggle(miscPage, "Freecam",
+	function() FreecamEnabled = true end,
+	function() FreecamEnabled = false; if FreecamActive then disableFreecam() end end
+)
+makeKeybind(miscPage, "Freecam Keybind", Enum.KeyCode.H, function(newKey)
+	FreecamKey = newKey
+end)
 
 -- // ONE-TIME BUTTON HELPER //
 local function makeButton(parent, labelText, onClick)
