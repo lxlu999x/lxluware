@@ -228,11 +228,11 @@ if FreecamEnabled and i.KeyCode == FreecamKey then
 				local moveVector = (rotation.LookVector * direction.Z) + (rotation.RightVector * direction.X) + Vector3.new(0, direction.Y, 0)
 				if moveVector.Magnitude > 0 then freecam_camPos += moveVector.Unit * freecam_speed end
 				Camera.CFrame = CFrame.new(freecam_camPos) * rotation
-			end)
+			end
 		end
 	end)
 
-RunService:BindToRenderStep("AimLock", 201, function()
+RunService:BindToRenderStep("AimLock", 201, function()  
 	if not AimlockEnabled or not IsAiming then return end
 
 	-- Always re-evaluate closest target every frame so we track whoever is nearest
