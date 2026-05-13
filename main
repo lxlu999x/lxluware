@@ -230,7 +230,7 @@ if FreecamEnabled and i.KeyCode == FreecamKey then
 				Camera.CFrame = CFrame.new(freecam_camPos) * rotation
 			end)
 		end
-	end
+	end)
 
 RunService:BindToRenderStep("AimLock", 201, function()
 	if not AimlockEnabled or not IsAiming then return end
