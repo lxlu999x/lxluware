@@ -174,8 +174,8 @@ local function getClosestTarget()
 end
 
 UserInputService.InputBegan:Connect(function(i, g)
-	if g or not AimlockEnabled then return end
-	if i.KeyCode == AimKey then
+	if g then return end
+	if AimlockEnabled and i.KeyCode == AimKey then
 		IsAiming = not IsAiming
 		if IsAiming then
 			CurrentTarget = getClosestTarget()
@@ -183,6 +183,22 @@ UserInputService.InputBegan:Connect(function(i, g)
 		else
 			CurrentTarget = nil
 			if mouse1release then mouse1release() end
+		end
+	end
+	if FreecamEnabled and i.KeyCode == FreecamKey then
+		if freecam_connection then
+			freecam_connection:Disconnect(); freecam_connection = nil
+			UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+			Camera.CameraType = Enum.CameraType.Custom
+			LocalPlayer.CameraMinZoomDistance = freecam_oldMinZoom
+			LocalPlayer.CameraMaxZoomDistance = freecam_oldMaxZoom
+			if freecam_humanoid then
+				freecam_humanoid.WalkSpeed = freecam_oldWalkSpeed
+				freecam_humanoid.JumpPower = freecam_oldJumpPower
+				freecam_humanoid = nil
+			end
+		else
+			enableFreecam()
 		end
 	end
 end)
@@ -515,6 +531,7 @@ end
 
 -- // FREECAM STATE //
 local FreecamEnabled = false
+local FreecamKey = Enum.KeyCode.H
 local freecam_connection = nil
 local freecam_camPos = Vector3.zero
 local freecam_yaw = 0
@@ -622,7 +639,8 @@ makeToggle(espPage, "Bee ESP", function() BeeESPEnabled = true; for _, d in pair
 local miscPage = makeTab("Misc")
 makeToggle(miscPage, "Kit Render",     function() setKitRender(true)    end, function() setKitRender(false)    end)
 makeToggle(miscPage, "Join Notifier",  function() setJoinNotifier(true)  end, function() setJoinNotifier(false)  end)
-makeToggle(miscPage, "Freecam",        function() enableFreecam()        end, function() disableFreecam()        end)
+makeToggle(miscPage, "Freecam", function() FreecamEnabled = true end, function() disableFreecam(); FreecamEnabled = false end)
+makeKeybind(miscPage, "Freecam Keybind", Enum.KeyCode.H, function(newKey) FreecamKey = newKey end)
 
 -- // ONE-TIME BUTTON HELPER //
 local function makeButton(parent, labelText, onClick)
