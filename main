@@ -513,6 +513,101 @@ local function makeKeybind(parent, labelText, currentKey, onUpdate)
 	end)
 end
 
+-- // FREECAM STATE //
+local FreecamEnabled = false
+local freecam_connection = nil
+local freecam_camPos = Vector3.zero
+local freecam_yaw = 0
+local freecam_pitch = 0
+local freecam_speed = 1
+local freecam_mouseSensitivity = 0.2
+local freecam_maxPitch = 85
+local freecam_humanoid = nil
+local freecam_oldWalkSpeed = 0
+local freecam_oldJumpPower = 0
+local freecam_oldMinZoom = 0
+local freecam_oldMaxZoom = 0
+local freecam_move = { W=false, A=false, S=false, D=false, Up=false, Down=false }
+
+local function freecam_updateMovement()
+	local dir = Vector3.zero
+	if freecam_move.W    then dir += Vector3.new(0, 0,  1) end
+	if freecam_move.S    then dir += Vector3.new(0, 0, -1) end
+	if freecam_move.A    then dir += Vector3.new(-1, 0, 0) end
+	if freecam_move.D    then dir += Vector3.new( 1, 0, 0) end
+	if freecam_move.Up   then dir += Vector3.new(0,  1, 0) end
+	if freecam_move.Down then dir += Vector3.new(0, -1, 0) end
+	return dir
+end
+
+local function enableFreecam()
+	FreecamEnabled = true
+	freecam_camPos = Camera.CFrame.Position
+	local x, y = Camera.CFrame:ToOrientation()
+	freecam_pitch = math.deg(x)
+	freecam_yaw   = math.deg(y)
+	Camera.CameraType = Enum.CameraType.Scriptable
+	freecam_oldMinZoom = LocalPlayer.CameraMinZoomDistance
+	freecam_oldMaxZoom = LocalPlayer.CameraMaxZoomDistance
+	LocalPlayer.CameraMinZoomDistance = 0.5
+	LocalPlayer.CameraMaxZoomDistance = 0.5
+	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+	local character = LocalPlayer.Character
+	if character then
+		freecam_humanoid = character:FindFirstChildOfClass("Humanoid")
+		if freecam_humanoid then
+			freecam_oldWalkSpeed = freecam_humanoid.WalkSpeed
+			freecam_oldJumpPower = freecam_humanoid.JumpPower
+			freecam_humanoid.WalkSpeed = 0
+			freecam_humanoid.JumpPower = 0
+		end
+	end
+	freecam_connection = RunService.RenderStepped:Connect(function()
+		local delta = UserInputService:GetMouseDelta()
+		freecam_yaw   -= delta.X * freecam_mouseSensitivity
+		freecam_pitch -= delta.Y * freecam_mouseSensitivity
+		freecam_pitch = math.clamp(freecam_pitch, -freecam_maxPitch, freecam_maxPitch)
+		local rotation = CFrame.Angles(0, math.rad(freecam_yaw), 0) * CFrame.Angles(math.rad(freecam_pitch), 0, 0)
+		local direction = freecam_updateMovement()
+		local moveVector = (rotation.LookVector * direction.Z) + (rotation.RightVector * direction.X) + Vector3.new(0, direction.Y, 0)
+		if moveVector.Magnitude > 0 then freecam_camPos += moveVector.Unit * freecam_speed end
+		Camera.CFrame = CFrame.new(freecam_camPos) * rotation
+	end)
+end
+
+local function disableFreecam()
+	FreecamEnabled = false
+	if freecam_connection then freecam_connection:Disconnect(); freecam_connection = nil end
+	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+	Camera.CameraType = Enum.CameraType.Custom
+	LocalPlayer.CameraMinZoomDistance = freecam_oldMinZoom
+	LocalPlayer.CameraMaxZoomDistance = freecam_oldMaxZoom
+	if freecam_humanoid then
+		freecam_humanoid.WalkSpeed = freecam_oldWalkSpeed
+		freecam_humanoid.JumpPower = freecam_oldJumpPower
+		freecam_humanoid = nil
+	end
+end
+
+-- Freecam WASD/Space/Ctrl keys (only active when freecam is on)
+UserInputService.InputBegan:Connect(function(i, g)
+	if g or not FreecamEnabled then return end
+	if i.KeyCode == Enum.KeyCode.W          then freecam_move.W    = true end
+	if i.KeyCode == Enum.KeyCode.A          then freecam_move.A    = true end
+	if i.KeyCode == Enum.KeyCode.S          then freecam_move.S    = true end
+	if i.KeyCode == Enum.KeyCode.D          then freecam_move.D    = true end
+	if i.KeyCode == Enum.KeyCode.Space      then freecam_move.Up   = true end
+	if i.KeyCode == Enum.KeyCode.LeftControl then freecam_move.Down = true end
+end)
+UserInputService.InputEnded:Connect(function(i)
+	if i.KeyCode == Enum.KeyCode.W          then freecam_move.W    = false end
+	if i.KeyCode == Enum.KeyCode.A          then freecam_move.A    = false end
+	if i.KeyCode == Enum.KeyCode.S          then freecam_move.S    = false end
+	if i.KeyCode == Enum.KeyCode.D          then freecam_move.D    = false end
+	if i.KeyCode == Enum.KeyCode.Space      then freecam_move.Up   = false end
+	if i.KeyCode == Enum.KeyCode.LeftControl then freecam_move.Down = false end
+end)
+
 -- // BUILD TABS //
 local combatPage = makeTab("Combat")
 makeToggle(combatPage, "Aimassist", function() AimlockEnabled = true end, function() AimlockEnabled = false; IsAiming = false; CurrentTarget = nil; if mouse1release then mouse1release() end end)
@@ -525,8 +620,9 @@ makeToggle(espPage, "Star ESP", function() StarESPEnabled = true; for _, d in pa
 makeToggle(espPage, "Bee ESP", function() BeeESPEnabled = true; for _, d in pairs(beeESPObjects) do d.gui.Enabled = true end end, function() BeeESPEnabled = false; for _, d in pairs(beeESPObjects) do d.gui.Enabled = false end end)
 
 local miscPage = makeTab("Misc")
-makeToggle(miscPage, "Kit Render", function() setKitRender(true) end, function() setKitRender(false) end)
-makeToggle(miscPage, "Join Notifier", function() setJoinNotifier(true) end, function() setJoinNotifier(false) end)
+makeToggle(miscPage, "Kit Render",     function() setKitRender(true)    end, function() setKitRender(false)    end)
+makeToggle(miscPage, "Join Notifier",  function() setJoinNotifier(true)  end, function() setJoinNotifier(false)  end)
+makeToggle(miscPage, "Freecam",        function() enableFreecam()        end, function() disableFreecam()        end)
 
 -- // ONE-TIME BUTTON HELPER //
 local function makeButton(parent, labelText, onClick)
